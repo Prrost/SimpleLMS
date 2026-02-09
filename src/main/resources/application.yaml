@@ -25,5 +25,12 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+logging:
+  level:
+    root: info
+    org.springframework: info
+    org.hibernate.SQL: info
+    kz.diploma.rprettser: info
+
 server:
   port: 8080
