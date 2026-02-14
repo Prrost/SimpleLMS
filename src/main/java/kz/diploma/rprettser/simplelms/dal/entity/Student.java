@@ -59,4 +59,8 @@ public class Student {
         studentGroups.remove(sg);
         sg.getStudents().remove(this);
     }
+
+    public void removeAllStudentGroups() {
+        new HashSet<>(studentGroups).forEach(this::removeStudentGroup);
+    }
 }

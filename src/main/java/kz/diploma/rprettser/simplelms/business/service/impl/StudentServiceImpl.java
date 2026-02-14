@@ -74,6 +74,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         if (!studentGroups.isEmpty()){
+            student.removeAllStudentGroups();
             student.setStudentGroups(studentGroups);
         }
 
