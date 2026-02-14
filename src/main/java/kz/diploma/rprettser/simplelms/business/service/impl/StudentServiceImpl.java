@@ -49,13 +49,15 @@ public class StudentServiceImpl implements StudentService {
                 .lastName(studentDto.getLastName())
                 .email(studentDto.getEmail())
                 .phone(studentDto.getPhone())
-                .studentGroups(studentGroups)
+                .studentGroups(new HashSet<>())
                 .createdBy(Constant.SYSTEM)
                 .updatedBy(Constant.SYSTEM)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .isDeleted(false)
                 .build();
+
+        studentGroups.forEach(student::addStudentGroup);
 
         return studentRepository.save(student);
     }
@@ -75,7 +77,7 @@ public class StudentServiceImpl implements StudentService {
 
         if (!studentGroups.isEmpty()){
             student.removeAllStudentGroups();
-            student.setStudentGroups(studentGroups);
+            studentGroups.forEach(student::addStudentGroup);
         }
 
         setIfNotNull(studentDto.getName(), student::setName);
