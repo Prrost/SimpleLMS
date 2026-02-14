@@ -2,11 +2,13 @@ package kz.diploma.rprettser.simplelms.business.mapper;
 
 
 import kz.diploma.rprettser.simplelms.business.dto.response.ClassroomResponseDto;
+import kz.diploma.rprettser.simplelms.business.dto.response.LessonResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentGroupResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentGroupShortDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentShortDto;
 import kz.diploma.rprettser.simplelms.dal.entity.Classroom;
+import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
 import lombok.RequiredArgsConstructor;
@@ -110,6 +112,27 @@ public class Mapper {
 
     public List<ClassroomResponseDto> toListClassroomResponseDto(List<Classroom> classrooms){
         return classrooms.stream().map(this::toClassroomResponseDto).toList();
+    }
+
+    public LessonResponseDto toLessonResponseDto(Lesson lesson){
+        return LessonResponseDto.builder()
+                .id(lesson.getId())
+                .name(lesson.getName())
+                .classroom(lesson.getClassroom() == null ? null : toClassroomResponseDto(lesson.getClassroom()))
+                .studentGroup(lesson.getStudentGroup() == null ? null : toStudentGroupShortDto(lesson.getStudentGroup()))
+                .startsAt(lesson.getStartsAt())
+                .endsAt(lesson.getEndsAt())
+                .expiresAt(lesson.getExpiresAt())
+                .createdAt(lesson.getCreatedAt())
+                .updatedAt(lesson.getUpdatedAt())
+                .createdBy(lesson.getCreatedBy())
+                .updatedBy(lesson.getUpdatedBy())
+                .isDeleted(lesson.getIsDeleted())
+                .build();
+    }
+
+    public List<LessonResponseDto> toListLessonResponseDto(List<Lesson> lessons){
+        return lessons.stream().map(this::toLessonResponseDto).toList();
     }
 
 }
