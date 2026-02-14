@@ -104,6 +104,6 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public Optional<Attendance> findByStudentIdAndLessonId(Long studentId, Long lessonId) {
-        return attendanceRepository.findFirstByStudentIdAndLessonId(lessonId, studentId);
+        return attendanceRepository.findFirstByStudentIdAndLessonId(studentId, lessonId);
     }
 }

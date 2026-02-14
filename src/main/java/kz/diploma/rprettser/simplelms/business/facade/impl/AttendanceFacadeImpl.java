@@ -79,6 +79,7 @@ public class AttendanceFacadeImpl implements AttendanceFacade {
         Lesson lesson = lessonService.findLessonByLessonName(request.getLessonName()).orElseThrow(() -> new NoSuchElementException("Lesson not found with name: " + request.getLessonName()));
 
         Attendance att = attendanceService.findByStudentIdAndLessonId(student.getId(), lesson.getId()).orElseThrow(() -> new NoSuchElementException("Attendance not found for student: " + student.getName() + " and lesson: " + lesson.getName()));
+
         Attendance changedAtt =  attendanceService.updateAttendance(
                 att.getId(),
                 AttendanceRequestDto.builder().attendanceMark(request.getAttendanceMark()).build()
