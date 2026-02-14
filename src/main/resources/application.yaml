@@ -32,5 +32,9 @@ logging:
     org.hibernate.SQL: info
     kz.diploma.rprettser: info
 
+springdoc:
+  api-docs:
+    version: OPENAPI_3_0
+
 server:
   port: 8080
