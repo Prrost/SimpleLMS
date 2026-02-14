@@ -33,3 +33,4 @@ build/
 .vscode/
 /data/lmsdb.mv.db
 /data/lmsdb.trace.db
+/frontend/node_modules/

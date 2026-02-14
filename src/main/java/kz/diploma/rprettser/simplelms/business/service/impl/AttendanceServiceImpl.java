@@ -101,4 +101,9 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         return attendanceRepository.save(attendance);
     }
+
+    @Override
+    public Optional<Attendance> findByStudentIdAndLessonId(Long studentId, Long lessonId) {
+        return attendanceRepository.findFirstByStudentIdAndLessonId(lessonId, studentId);
+    }
 }

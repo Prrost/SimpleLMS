@@ -15,4 +15,6 @@ public interface AttendanceFacade {
     AttendanceResponseDto updateAttendance(Long id, AttendanceRequestDto attendanceRequestDto);
 
     AttendanceResponseDto deleteAttendance(Long id);
+
+    AttendanceResponseDto setAttendanceForStudent(AttendanceRequestDto request);
 }

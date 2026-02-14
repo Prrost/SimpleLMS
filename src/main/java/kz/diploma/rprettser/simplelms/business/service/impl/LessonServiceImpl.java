@@ -107,4 +107,10 @@ public class LessonServiceImpl implements LessonService {
 
         return lessonRepository.save(lesson);
     }
+
+    @Override
+    public Optional<Lesson> findLessonByLessonName(String lessonName) {
+
+        return lessonRepository.findByName((lessonName));
+    }
 }

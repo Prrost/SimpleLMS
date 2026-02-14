@@ -16,4 +16,6 @@ public interface LessonService {
     Lesson updateLesson(Long id, LessonRequestDto lessonDto);
 
     Lesson deleteLesson(Long id);
+
+    Optional<Lesson> findLessonByLessonName(String lessonName);
 }

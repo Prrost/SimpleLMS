@@ -8,4 +8,10 @@ public class ObjectUtil {
             setter.accept(value);
         }
     }
+
+    public static <T> void ifNullThrow(T value, String message) {
+        if (value == null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
 }

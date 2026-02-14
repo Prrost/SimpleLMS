@@ -16,5 +16,9 @@ public class AttendanceRequestDto {
 
     private Long lessonId;
 
+    private String studentName;
+
+    private String lessonName;
+
     private AttendanceMark attendanceMark;
 }

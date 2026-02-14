@@ -16,4 +16,6 @@ public interface AttendanceService {
     Attendance updateAttendance(Long id, AttendanceRequestDto attendanceDto);
 
     Attendance deleteAttendance(Long id);
+
+    Optional<Attendance> findByStudentIdAndLessonId(Long studentId, Long lessonId);
 }

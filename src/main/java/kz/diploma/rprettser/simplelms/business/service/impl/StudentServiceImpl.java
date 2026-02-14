@@ -1,5 +1,6 @@
 package kz.diploma.rprettser.simplelms.business.service.impl;
 
+import jakarta.transaction.Transactional;
 import kz.diploma.rprettser.simplelms.business.dto.request.StudentRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentResponseDto;
 import kz.diploma.rprettser.simplelms.business.service.StudentGroupService;
@@ -24,16 +25,19 @@ public class StudentServiceImpl implements StudentService {
     private final StudentGroupService studentGroupService;
 
     @Override
+    @Transactional
     public Optional<Student> getStudentById(Long id) {
         return studentRepository.findById(id);
     }
 
     @Override
+    @Transactional
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
     }
 
     @Override
+    @Transactional
     public Student createStudent(StudentRequestDto studentDto) {
         Set<StudentGroup> studentGroups = new HashSet<>();
 
@@ -63,6 +67,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
     public Student updateStudent(Long id, StudentRequestDto studentDto) {
         Student student = this.getStudentById(id).orElseThrow(() -> new NoSuchElementException("No student found with id: " + id));
 
@@ -91,6 +96,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
     public Student deleteStudent(Long id) {
         Student student = this.getStudentById(id).orElseThrow(() -> new NoSuchElementException("No student found with id: " + id));
 
@@ -99,5 +105,10 @@ public class StudentServiceImpl implements StudentService {
         student.setUpdatedAt(LocalDateTime.now());
 
         return studentRepository.save(student);
+    }
+
+    @Override
+    public Optional<Student> findStudentByStudentName(String studentName) {
+        return studentRepository.findByName(studentName);
     }
 }
