@@ -1,6 +1,7 @@
 package kz.diploma.rprettser.simplelms.business.mapper;
 
 
+import kz.diploma.rprettser.simplelms.business.dto.response.AttendanceResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.ClassroomResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.LessonResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentGroupResponseDto;
@@ -8,6 +9,7 @@ import kz.diploma.rprettser.simplelms.business.dto.response.StudentGroupShortDto
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentShortDto;
 import kz.diploma.rprettser.simplelms.dal.entity.Classroom;
+import kz.diploma.rprettser.simplelms.dal.entity.Attendance;
 import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
@@ -133,6 +135,24 @@ public class Mapper {
 
     public List<LessonResponseDto> toListLessonResponseDto(List<Lesson> lessons){
         return lessons.stream().map(this::toLessonResponseDto).toList();
+    }
+
+    public AttendanceResponseDto toAttendanceResponseDto(Attendance attendance){
+        return AttendanceResponseDto.builder()
+                .id(attendance.getId())
+                .student(attendance.getStudent() == null ? null : toStudentShortDto(attendance.getStudent()))
+                .lesson(attendance.getLesson() == null ? null : toLessonResponseDto(attendance.getLesson()))
+                .attendanceMark(attendance.getAttendanceMark())
+                .createdAt(attendance.getCreatedAt())
+                .updatedAt(attendance.getUpdatedAt())
+                .createdBy(attendance.getCreatedBy())
+                .updatedBy(attendance.getUpdatedBy())
+                .isDeleted(attendance.getIsDeleted())
+                .build();
+    }
+
+    public List<AttendanceResponseDto> toListAttendanceResponseDto(List<Attendance> attendances){
+        return attendances.stream().map(this::toAttendanceResponseDto).toList();
     }
 
 }
