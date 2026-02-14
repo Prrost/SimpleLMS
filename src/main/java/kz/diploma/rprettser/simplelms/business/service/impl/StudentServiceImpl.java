@@ -38,7 +38,10 @@ public class StudentServiceImpl implements StudentService {
         Set<StudentGroup> studentGroups = new HashSet<>();
 
         if (studentDto.getStudentGroupsIds() != null) {
-            studentDto.getStudentGroupsIds().forEach(sgId -> studentGroups.add(studentGroupService.findStudentGroupId(sgId)));
+            studentDto.getStudentGroupsIds().forEach(
+                    sgId -> studentGroups.add(studentGroupService.getStudentGroupById(sgId)
+                            .orElseThrow(() -> new NoSuchElementException("No student group found with id: " + sgId)))
+            );
         }
 
         Student student = Student.builder()
@@ -64,7 +67,10 @@ public class StudentServiceImpl implements StudentService {
         Set<StudentGroup> studentGroups = new HashSet<>();
 
         if (studentDto.getStudentGroupsIds() != null) {
-            studentDto.getStudentGroupsIds().forEach(sgId -> studentGroups.add(studentGroupService.findStudentGroupId(sgId)));
+            studentDto.getStudentGroupsIds().forEach(
+                    sgId -> studentGroups.add(studentGroupService.getStudentGroupById(sgId)
+                            .orElseThrow(() -> new NoSuchElementException("No student group found with id: " + sgId)))
+            );
         }
 
         if (!studentGroups.isEmpty()){
