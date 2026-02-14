@@ -1,10 +1,12 @@
 package kz.diploma.rprettser.simplelms.business.mapper;
 
 
+import kz.diploma.rprettser.simplelms.business.dto.response.ClassroomResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentGroupResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentGroupShortDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentResponseDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentShortDto;
+import kz.diploma.rprettser.simplelms.dal.entity.Classroom;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +94,22 @@ public class Mapper {
 
     public List<StudentGroupResponseDto> toListStudentGroupResponseDto(List<StudentGroup> studentGroups){
         return studentGroups.stream().map(this::toStudentGroupResponseDto).toList();
+    }
+
+    public ClassroomResponseDto toClassroomResponseDto(Classroom classroom){
+        return ClassroomResponseDto.builder()
+                .id(classroom.getId())
+                .name(classroom.getName())
+                .createdAt(classroom.getCreatedAt())
+                .updatedAt(classroom.getUpdatedAt())
+                .createdBy(classroom.getCreatedBy())
+                .updatedBy(classroom.getUpdatedBy())
+                .isDeleted(classroom.getIsDeleted())
+                .build();
+    }
+
+    public List<ClassroomResponseDto> toListClassroomResponseDto(List<Classroom> classrooms){
+        return classrooms.stream().map(this::toClassroomResponseDto).toList();
     }
 
 }
