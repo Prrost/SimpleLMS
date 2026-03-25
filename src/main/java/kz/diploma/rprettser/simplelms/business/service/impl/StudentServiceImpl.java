@@ -37,6 +37,11 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public List<Student> getAllStudentsByIds(List<Long> ids) {
+        return studentRepository.findAllById(ids);
+    }
+
+    @Override
     @Transactional
     public Student createStudent(StudentRequestDto studentDto) {
         Set<StudentGroup> studentGroups = new HashSet<>();

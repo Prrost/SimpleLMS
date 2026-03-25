@@ -2,6 +2,7 @@ package kz.diploma.rprettser.simplelms.business.service.impl;
 
 import kz.diploma.rprettser.simplelms.business.dto.request.StudentGroupRequestDto;
 import kz.diploma.rprettser.simplelms.business.service.StudentGroupService;
+import kz.diploma.rprettser.simplelms.business.service.StudentService;
 import kz.diploma.rprettser.simplelms.common.constant.Constant;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
@@ -11,11 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static kz.diploma.rprettser.simplelms.common.utils.ObjectUtil.setIfNotNull;
 
@@ -24,7 +21,7 @@ import static kz.diploma.rprettser.simplelms.common.utils.ObjectUtil.setIfNotNul
 public class StudentGroupServiceImpl implements StudentGroupService {
 
     private final StudentGroupRepository studentGroupRepository;
-    private final StudentRepository studentRepository;
+    private final StudentService studentService;
 
 
     @Override
@@ -42,9 +39,15 @@ public class StudentGroupServiceImpl implements StudentGroupService {
         Set<Student> students = new HashSet<>();
 
         if (studentGroupDto.getStudentIds() != null) {
-            studentGroupDto.getStudentIds()
-                    .forEach(studentId -> students.add(studentRepository.findById(studentId)
-                            .orElseThrow(() -> new NoSuchElementException("No student found with id: " + studentId))));
+            var foundStudents = studentService.getAllStudentsByIds(new ArrayList<>(studentGroupDto.getStudentIds()));
+            var foundStudentsIds = foundStudents.stream().map(Student::getId).toList();
+            var notFoundStudents = studentGroupDto.getStudentIds().stream().filter(studentId -> !foundStudentsIds.contains(studentId)).toList();
+
+            if (!notFoundStudents.isEmpty()) {
+                throw new NoSuchElementException("No students found with id's: " + notFoundStudents);
+            }
+
+            students.addAll(foundStudents);
         }
 
         StudentGroup studentGroup = StudentGroup.builder()
@@ -69,9 +72,15 @@ public class StudentGroupServiceImpl implements StudentGroupService {
         Set<Student> students = new HashSet<>();
 
         if (studentGroupDto.getStudentIds() != null) {
-            studentGroupDto.getStudentIds()
-                    .forEach(studentId -> students.add(studentRepository.findById(studentId)
-                            .orElseThrow(() -> new NoSuchElementException("No student found with id: " + studentId))));
+            var foundStudents = studentService.getAllStudentsByIds(new ArrayList<>(studentGroupDto.getStudentIds()));
+            var foundStudentsIds = foundStudents.stream().map(Student::getId).toList();
+            var notFoundStudents = studentGroupDto.getStudentIds().stream().filter(studentId -> !foundStudentsIds.contains(studentId)).toList();
+
+            if (!notFoundStudents.isEmpty()) {
+                throw new NoSuchElementException("No students found with id's: " + notFoundStudents);
+            }
+
+            students.addAll(foundStudents);
         }
 
         if (!students.isEmpty()) {
