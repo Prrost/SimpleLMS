@@ -11,6 +11,8 @@ import kz.diploma.rprettser.simplelms.dal.entity.Attendance;
 import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,22 @@ public class AttendanceFacadeImpl implements AttendanceFacade {
         List<Attendance> attendances = attendanceService.getAllAttendances();
 
         return mapper.toListAttendanceResponseDto(attendances);
+    }
+
+    @Override
+    @Transactional
+    public Page<AttendanceResponseDto> searchAttendances(Long studentId, Long lessonId, String attendanceMark, Pageable pageable) {
+        return mapper.toPageableAttendanceResponseDto(
+                attendanceService.searchAttendances(studentId, lessonId, attendanceMark, pageable)
+        );
+    }
+
+    @Override
+    @Transactional
+    public Page<AttendanceResponseDto> getAllAttendancesPageable(Pageable pageable) {
+        Page<Attendance> attendances = attendanceService.getAllAttendancesPageable(pageable);
+
+        return attendances.map(mapper::toAttendanceResponseDto);
     }
 
     @Override

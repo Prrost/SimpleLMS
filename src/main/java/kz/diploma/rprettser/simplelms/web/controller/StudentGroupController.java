@@ -4,6 +4,10 @@ import kz.diploma.rprettser.simplelms.business.dto.request.StudentGroupRequestDt
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentGroupResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.StudentGroupFacade;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +22,15 @@ public class StudentGroupController {
     @GetMapping("/all")
     public List<StudentGroupResponseDto> getAllStudentGroups(){
         return studentGroupFacade.getAllStudentGroups();
+    }
+
+    @GetMapping
+    public Page<StudentGroupResponseDto> getAllStudentGroupPageable(
+            @RequestParam(required = false) Boolean isVirtual,
+            @RequestParam(required = false) String name,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        return studentGroupFacade.searchStudentGroups(name, isVirtual, pageable);
     }
 
     @GetMapping("/{id}")

@@ -1,5 +1,6 @@
 package kz.diploma.rprettser.simplelms.business.service.impl;
 
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import kz.diploma.rprettser.simplelms.business.dto.request.StudentRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentResponseDto;
@@ -10,6 +11,11 @@ import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
 import kz.diploma.rprettser.simplelms.dal.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,7 +28,10 @@ import static kz.diploma.rprettser.simplelms.common.utils.ObjectUtil.setIfNotNul
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
-    private final StudentGroupService studentGroupService;
+
+    @Lazy
+    @Autowired
+    private StudentGroupService studentGroupService;
 
     @Override
     @Transactional
@@ -37,6 +46,37 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
+    public Page<Student> getAllStudentsPageable(Pageable pageable) {
+        return studentRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional
+    public Page<Student> searchStudents(String name, String lastName, String email, String phone, Pageable pageable) {
+        Specification<Student> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (name != null && !name.isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+            if (lastName != null && !lastName.isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), "%" + lastName.toLowerCase() + "%"));
+            }
+            if (email != null && !email.isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), "%" + email.toLowerCase() + "%"));
+            }
+            if (phone != null && !phone.isEmpty()) {
+                predicates.add(criteriaBuilder.like(root.get("phone"), "%" + phone + "%"));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return studentRepository.findAll(spec, pageable);
+    }
+
+    @Override
     public List<Student> getAllStudentsByIds(List<Long> ids) {
         return studentRepository.findAllById(ids);
     }
@@ -47,10 +87,16 @@ public class StudentServiceImpl implements StudentService {
         Set<StudentGroup> studentGroups = new HashSet<>();
 
         if (studentDto.getStudentGroupsIds() != null) {
-            studentDto.getStudentGroupsIds().forEach(
-                    sgId -> studentGroups.add(studentGroupService.getStudentGroupById(sgId)
-                            .orElseThrow(() -> new NoSuchElementException("No student group found with id: " + sgId)))
-            );
+
+            var foundStudentGroups = studentGroupService.getAllStudentGroupsByIds(new ArrayList<>(studentDto.getStudentGroupsIds()));
+            var foundStudentGroupsIds = foundStudentGroups.stream().map(StudentGroup::getId).toList();
+            var notFoundStudentGroups = studentDto.getStudentGroupsIds().stream().filter(studentId -> !foundStudentGroupsIds.contains(studentId)).toList();
+
+            if (!notFoundStudentGroups.isEmpty()) {
+                throw new NoSuchElementException("No student groups found with id's: " + notFoundStudentGroups);
+            }
+
+            studentGroups.addAll(foundStudentGroups);
         }
 
         Student student = Student.builder()
@@ -79,10 +125,16 @@ public class StudentServiceImpl implements StudentService {
         Set<StudentGroup> studentGroups = new HashSet<>();
 
         if (studentDto.getStudentGroupsIds() != null) {
-            studentDto.getStudentGroupsIds().forEach(
-                    sgId -> studentGroups.add(studentGroupService.getStudentGroupById(sgId)
-                            .orElseThrow(() -> new NoSuchElementException("No student group found with id: " + sgId)))
-            );
+
+            var foundStudentGroups = studentGroupService.getAllStudentGroupsByIds(new ArrayList<>(studentDto.getStudentGroupsIds()));
+            var foundStudentGroupsIds = foundStudentGroups.stream().map(StudentGroup::getId).toList();
+            var notFoundStudentGroups = studentDto.getStudentGroupsIds().stream().filter(studentId -> !foundStudentGroupsIds.contains(studentId)).toList();
+
+            if (!notFoundStudentGroups.isEmpty()) {
+                throw new NoSuchElementException("No student groups found with id's: " + notFoundStudentGroups);
+            }
+
+            studentGroups.addAll(foundStudentGroups);
         }
 
         if (!studentGroups.isEmpty()){

@@ -4,6 +4,10 @@ import kz.diploma.rprettser.simplelms.business.dto.request.LessonRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.LessonResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.LessonFacade;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +22,16 @@ public class LessonController {
     @GetMapping("/all")
     public List<LessonResponseDto> getAllLessons(){
         return lessonFacade.getAllLessons();
+    }
+
+    @GetMapping
+    public Page<LessonResponseDto> getAllLessonsPageable(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long classroomId,
+            @RequestParam(required = false) Long studentGroupId,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        return lessonFacade.searchLessons(name, classroomId, studentGroupId, pageable);
     }
 
     @GetMapping("/{id}")

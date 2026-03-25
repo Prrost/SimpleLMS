@@ -3,11 +3,17 @@ package kz.diploma.rprettser.simplelms.web.controller;
 import kz.diploma.rprettser.simplelms.business.dto.request.AttendanceRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.AttendanceResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.AttendanceFacade;
+import kz.diploma.rprettser.simplelms.business.mapper.Mapper;
+import kz.diploma.rprettser.simplelms.business.service.AttendanceService;
 import kz.diploma.rprettser.simplelms.business.service.LessonService;
 import kz.diploma.rprettser.simplelms.business.service.StudentService;
 import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +31,16 @@ public class AttendanceController {
     @GetMapping("/all")
     public List<AttendanceResponseDto> getAllAttendances(){
         return attendanceFacade.getAllAttendances();
+    }
+
+    @GetMapping
+    public Page<AttendanceResponseDto> getAllAttendancesPageable(
+            @RequestParam(required = false) Long studentId,
+            @RequestParam(required = false) Long lessonId,
+            @RequestParam(required = false) String attendanceMark,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        return attendanceFacade.searchAttendances(studentId, lessonId, attendanceMark, pageable);
     }
 
     @GetMapping("/{id}")

@@ -8,6 +8,8 @@ import kz.diploma.rprettser.simplelms.business.mapper.Mapper;
 import kz.diploma.rprettser.simplelms.business.service.LessonService;
 import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,6 +29,23 @@ public class LessonFacadeImpl implements LessonFacade {
 
         return mapper.toListLessonResponseDto(lessons);
     }
+
+    @Override
+    @Transactional
+    public Page<LessonResponseDto> getAllLessonsPageable(Pageable pageable) {
+        Page<Lesson> lessons = lessonService.getAllLessonsPageable(pageable);
+
+        return lessons.map(mapper::toLessonResponseDto);
+    }
+
+    @Override
+    @Transactional
+    public Page<LessonResponseDto> searchLessons(String name, Long classroomId, Long studentGroupId, Pageable pageable) {
+        return mapper.toPageableLessonResponseDto(
+                lessonService.searchLessons(name, classroomId, studentGroupId, pageable)
+        );
+    }
+
 
     @Override
     @Transactional

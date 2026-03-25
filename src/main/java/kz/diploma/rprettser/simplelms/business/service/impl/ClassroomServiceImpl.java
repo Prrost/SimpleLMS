@@ -1,14 +1,20 @@
 package kz.diploma.rprettser.simplelms.business.service.impl;
 
+import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import kz.diploma.rprettser.simplelms.business.dto.request.ClassroomRequestDto;
 import kz.diploma.rprettser.simplelms.business.service.ClassroomService;
 import kz.diploma.rprettser.simplelms.common.constant.Constant;
 import kz.diploma.rprettser.simplelms.dal.entity.Classroom;
 import kz.diploma.rprettser.simplelms.dal.repository.ClassroomRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -29,6 +35,27 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Override
     public List<Classroom> getAllClassrooms() {
         return classroomRepository.findAll();
+    }
+
+    @Override
+    public Page<Classroom> getAllClassroomsPageable(Pageable pageable) {
+        return classroomRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional
+    public Page<Classroom> searchClassrooms(String name, Pageable pageable) {
+        Specification<Classroom> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (name != null && !name.isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return classroomRepository.findAll(spec, pageable);
     }
 
     @Override

@@ -8,6 +8,8 @@ import kz.diploma.rprettser.simplelms.business.mapper.Mapper;
 import kz.diploma.rprettser.simplelms.business.service.StudentService;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,6 +28,22 @@ public class StudentFacadeImpl implements StudentFacade {
         List<Student> students =  studentService.getAllStudents();
 
         return mapper.toListStudentResponseDto(students);
+    }
+
+    @Override
+    @Transactional
+    public Page<StudentResponseDto> searchStudents(String name, String lastName, String email, String phone, Pageable pageable){
+        return mapper.toPageableGroupResponseDto(
+                studentService.searchStudents(name, lastName, email, phone, pageable)
+        );
+    }
+
+    @Override
+    @Transactional
+    public Page<StudentResponseDto> getAllStudentsPageable(Pageable pageable) {
+        Page<Student> students = studentService.getAllStudentsPageable(pageable);
+
+        return students.map(mapper::toStudentResponseDto);
     }
 
     @Override

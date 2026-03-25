@@ -14,6 +14,7 @@ import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -65,6 +66,10 @@ public class Mapper {
         return students.stream().map(this::toStudentShortDto).collect(Collectors.toSet());
     }
 
+    public Page<StudentResponseDto> toPageableGroupResponseDto(Page<Student> students) {
+        return students.map(this::toStudentResponseDto);
+    }
+
     public StudentGroupShortDto toStudentGroupShortDto(StudentGroup studentGroup){
         return StudentGroupShortDto.builder().
                 id(studentGroup.getId()).
@@ -80,6 +85,10 @@ public class Mapper {
 
     public Set<StudentGroupShortDto> toSetStudentGroupShortDto(Collection<StudentGroup> studentGroups){
         return studentGroups.stream().map(this::toStudentGroupShortDto).collect(Collectors.toSet());
+    }
+
+    public Page<StudentGroupResponseDto> toPageableStudentGroupResponseDto(Page<StudentGroup> students){
+        return students.map(this::toStudentGroupResponseDto);
     }
 
     public StudentGroupResponseDto toStudentGroupResponseDto(StudentGroup studentGroup){
@@ -116,6 +125,10 @@ public class Mapper {
         return classrooms.stream().map(this::toClassroomResponseDto).toList();
     }
 
+    public Page<ClassroomResponseDto> toPageableClassroomResponseDto(Page<Classroom> classrooms){
+        return classrooms.map(this::toClassroomResponseDto);
+    }
+
     public LessonResponseDto toLessonResponseDto(Lesson lesson){
         return LessonResponseDto.builder()
                 .id(lesson.getId())
@@ -137,6 +150,10 @@ public class Mapper {
         return lessons.stream().map(this::toLessonResponseDto).toList();
     }
 
+    public Page<LessonResponseDto> toPageableLessonResponseDto(Page<Lesson> lessons){
+        return lessons.map(this::toLessonResponseDto);
+    }
+
     public AttendanceResponseDto toAttendanceResponseDto(Attendance attendance){
         return AttendanceResponseDto.builder()
                 .id(attendance.getId())
@@ -153,6 +170,9 @@ public class Mapper {
 
     public List<AttendanceResponseDto> toListAttendanceResponseDto(List<Attendance> attendances){
         return attendances.stream().map(this::toAttendanceResponseDto).toList();
+    }
+    public Page<AttendanceResponseDto> toPageableAttendanceResponseDto(Page<Attendance> attendances){
+        return attendances.map(this::toAttendanceResponseDto);
     }
 
 }

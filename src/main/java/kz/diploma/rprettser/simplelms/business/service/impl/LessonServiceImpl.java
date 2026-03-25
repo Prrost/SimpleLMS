@@ -1,5 +1,7 @@
 package kz.diploma.rprettser.simplelms.business.service.impl;
 
+import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import kz.diploma.rprettser.simplelms.business.dto.request.LessonRequestDto;
 import kz.diploma.rprettser.simplelms.business.service.ClassroomService;
 import kz.diploma.rprettser.simplelms.business.service.LessonService;
@@ -10,9 +12,13 @@ import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
 import kz.diploma.rprettser.simplelms.dal.repository.LessonRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -35,6 +41,33 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public List<Lesson> getAllLessons() {
         return lessonRepository.findAll();
+    }
+
+    @Override
+    public Page<Lesson> getAllLessonsPageable(Pageable pageable) {
+        return lessonRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional
+    public Page<Lesson> searchLessons(String name, Long classroomId, Long studentGroupId, Pageable pageable) {
+        Specification<Lesson> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (name != null && !name.isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+            if (classroomId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("classroom").get("id"), classroomId));
+            }
+            if (studentGroupId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("studentGroup").get("id"), studentGroupId));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return lessonRepository.findAll(spec, pageable);
     }
 
     @Override

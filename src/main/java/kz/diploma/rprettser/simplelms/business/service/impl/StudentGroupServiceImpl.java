@@ -1,5 +1,7 @@
 package kz.diploma.rprettser.simplelms.business.service.impl;
 
+import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import kz.diploma.rprettser.simplelms.business.dto.request.StudentGroupRequestDto;
 import kz.diploma.rprettser.simplelms.business.service.StudentGroupService;
 import kz.diploma.rprettser.simplelms.business.service.StudentService;
@@ -9,6 +11,9 @@ import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
 import kz.diploma.rprettser.simplelms.dal.repository.StudentGroupRepository;
 import kz.diploma.rprettser.simplelms.dal.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +37,35 @@ public class StudentGroupServiceImpl implements StudentGroupService {
     @Override
     public List<StudentGroup> getAllStudentGroups() {
         return studentGroupRepository.findAll();
+    }
+
+    @Override
+    public Page<StudentGroup> getAllStudentGroupsPageable(Pageable pageable) {
+        return studentGroupRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional
+    public Page<StudentGroup> searchStudentGroups(String name, Boolean isVirtual, Pageable pageable) {
+        Specification<StudentGroup> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (name != null && !name.isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+            if (isVirtual != null) {
+                predicates.add(criteriaBuilder.equal(root.get("isVirtual"), isVirtual));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return studentGroupRepository.findAll(spec, pageable);
+    }
+
+    @Override
+    public List<StudentGroup> getAllStudentGroupsByIds(List<Long> ids) {
+        return studentGroupRepository.findAllById(ids);
     }
 
     @Override
