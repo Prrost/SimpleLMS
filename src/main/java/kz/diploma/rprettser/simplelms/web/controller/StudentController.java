@@ -4,6 +4,7 @@ import kz.diploma.rprettser.simplelms.business.dto.request.StudentRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.StudentFacade;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController()
 @RequestMapping("/api/student")
@@ -32,6 +34,7 @@ public class StudentController {
             @RequestParam(required = false) String phone,
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
+        log.info("name: {}, lastName: {}, email: {}, phone: {}", name, lastName, email, phone);
         return studentFacade.searchStudents(name, lastName, email, phone, pageable);
     }
 

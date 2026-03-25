@@ -1,94 +1,80 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import StatusPill from "../components/StatusPill.jsx";
+import { createEntity, fetchById, fetchPage, updateEntity } from "../api.js";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "";
 const MARKS = ["PRESENT", "ABSENT", "LATE", "EXCUSED"];
-
-function formatDate(value) {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString();
-}
 
 export default function LessonAttendancePage() {
   const { lessonId } = useParams();
   const [lesson, setLesson] = useState(null);
-  const [group, setGroup] = useState(null);
   const [students, setStudents] = useState([]);
-  const [attendanceMap, setAttendanceMap] = useState({});
+  const [attendanceByStudentId, setAttendanceByStudentId] = useState({});
   const [selectionMap, setSelectionMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [saveMessage, setSaveMessage] = useState("");
-
-  const attendanceList = useMemo(() => Object.values(attendanceMap), [attendanceMap]);
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setError("");
-    setSaveMessage("");
 
-    async function load() {
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      setSuccess("");
+
       try {
-        const lessonRes = await fetch(`${API_BASE}/api/lesson/${lessonId}`);
-        if (!lessonRes.ok) throw new Error("Failed to load lesson");
-        const lessonData = await lessonRes.json();
+        const lessonData = await fetchById("/api/lesson", lessonId);
         if (!active) return;
+
         setLesson(lessonData);
 
-        const groupId = lessonData.studentGroup?.id;
-        if (!groupId) {
-          setGroup(null);
+        if (!lessonData.studentGroup?.id) {
           setStudents([]);
-          setAttendanceMap({});
+          setAttendanceByStudentId({});
           setSelectionMap({});
           return;
         }
 
-        const [groupRes, attendanceRes] = await Promise.all([
-          fetch(`${API_BASE}/api/student_group/${groupId}`),
-          fetch(`${API_BASE}/api/attendance/all`)
+        const [groupData, attendancePage] = await Promise.all([
+          fetchById("/api/student_group", lessonData.studentGroup.id),
+          fetchPage("/api/attendance", {
+            lessonId: Number(lessonId),
+            page: 0,
+            size: 500,
+            sort: "id,asc"
+          })
         ]);
 
-        if (!groupRes.ok) throw new Error("Failed to load student group");
-        if (!attendanceRes.ok) throw new Error("Failed to load attendance list");
-
-        const groupData = await groupRes.json();
-        const attendanceData = await attendanceRes.json();
         if (!active) return;
 
         const groupStudents = Array.isArray(groupData.students) ? groupData.students : [];
-        const filteredAttendance = Array.isArray(attendanceData)
-          ? attendanceData.filter((item) => item.lesson?.id === Number(lessonId))
-          : [];
+        const records = Array.isArray(attendancePage.content) ? attendancePage.content : [];
 
         const byStudent = {};
-        const selections = {};
-        filteredAttendance.forEach((item) => {
-          if (item.student?.id != null) {
-            byStudent[item.student.id] = item;
-            if (item.attendanceMark) {
-              selections[item.student.id] = item.attendanceMark;
-            }
+        const selected = {};
+        records.forEach((item) => {
+          const studentId = item.student?.id;
+          if (studentId == null) return;
+          byStudent[studentId] = item;
+          if (item.attendanceMark) {
+            selected[studentId] = item.attendanceMark;
           }
         });
 
-        setGroup(groupData);
         setStudents(groupStudents);
-        setAttendanceMap(byStudent);
-        setSelectionMap(selections);
+        setAttendanceByStudentId(byStudent);
+        setSelectionMap(selected);
       } catch (err) {
         if (active) {
-          setError(err.message || "Error loading attendance");
+          setError(err.message || "Failed to load lesson attendance");
         }
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
-    }
+    };
 
     load();
 
@@ -97,61 +83,44 @@ export default function LessonAttendancePage() {
     };
   }, [lessonId]);
 
-  const handleSelect = (studentId, mark) => {
-    setSelectionMap((prev) => ({ ...prev, [studentId]: mark }));
-  };
+  const recap = useMemo(
+    () =>
+      MARKS.map((mark) => ({
+        mark,
+        count: Object.values(attendanceByStudentId).filter((item) => item.attendanceMark === mark).length
+      })),
+    [attendanceByStudentId]
+  );
 
   const handleSave = async () => {
     setSaving(true);
-    setSaveMessage("");
     setError("");
+    setSuccess("");
 
-    const updates = students
-      .filter((student) => selectionMap[student.id])
-      .map((student) => {
-        const selectedMark = selectionMap[student.id];
-        const existing = attendanceMap[student.id];
+    try {
+      for (const student of students) {
+        const chosenMark = selectionMap[student.id];
+        if (!chosenMark) continue;
+
+        const existing = attendanceByStudentId[student.id];
         const payload = {
           studentId: student.id,
           lessonId: Number(lessonId),
-          attendanceMark: selectedMark
+          attendanceMark: chosenMark
         };
-        if (existing?.id) {
-          return {
-            id: existing.id,
-            method: "PUT",
-            url: `${API_BASE}/api/attendance/${existing.id}`,
-            payload
-          };
-        }
-        return {
-          id: null,
-          method: "POST",
-          url: `${API_BASE}/api/attendance`,
-          payload
-        };
-      });
 
-    try {
-      for (const item of updates) {
-        const res = await fetch(item.url, {
-          method: item.method,
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(item.payload)
-        });
-        if (!res.ok) {
-          throw new Error("Failed to save attendance");
-        }
-        const saved = await res.json();
+        const saved = existing?.id
+          ? await updateEntity("/api/attendance", existing.id, payload)
+          : await createEntity("/api/attendance", payload);
+
         if (saved?.student?.id != null) {
-          setAttendanceMap((prev) => ({ ...prev, [saved.student.id]: saved }));
+          setAttendanceByStudentId((prev) => ({ ...prev, [saved.student.id]: saved }));
         }
       }
-      setSaveMessage("Attendance saved successfully");
+
+      setSuccess("Attendance updated");
     } catch (err) {
-      setError(err.message || "Error saving attendance");
+      setError(err.message || "Failed to save attendance");
     } finally {
       setSaving(false);
     }
@@ -160,10 +129,7 @@ export default function LessonAttendancePage() {
   if (loading) {
     return (
       <section className="page">
-        <div className="card skeleton">
-          <div className="skeleton-line" />
-          <div className="skeleton-line" />
-        </div>
+        <div className="card">Loading attendance...</div>
       </section>
     );
   }
@@ -171,8 +137,7 @@ export default function LessonAttendancePage() {
   if (!lesson) {
     return (
       <section className="page">
-        <div className="notice error">Lesson not found.</div>
-        <Link to="/lessons" className="btn secondary">Back to lessons</Link>
+        <div className="notice notice-error">Lesson not found.</div>
       </section>
     );
   }
@@ -181,106 +146,76 @@ export default function LessonAttendancePage() {
     <section className="page">
       <div className="page-header">
         <div>
-          <Link to="/lessons" className="back-link">← Back to lessons</Link>
-          <h1 className="page-title">{lesson.name || `Lesson #${lesson.id}`}</h1>
-          <p className="page-subtitle">
-            Group: {lesson.studentGroup?.name || "No group assigned"} · Classroom: {lesson.classroom?.name || "—"}
-          </p>
+          <Link to="/lessons" className="table-link">Back to lessons</Link>
+          <h1 className="page-title">{lesson.name || `Lesson #${lesson.id}`} Attendance</h1>
+          <p className="page-subtitle">Group: {lesson.studentGroup?.name || "No group assigned"}</p>
         </div>
-        <div className="page-meta">
-          <StatusPill text={`Starts ${formatDate(lesson.startsAt)}`} tone="info" />
-          <StatusPill text={`Ends ${formatDate(lesson.endsAt)}`} tone="neutral" />
-        </div>
+        <button className="btn" onClick={handleSave} disabled={saving}>
+          {saving ? "Saving..." : "Save attendance"}
+        </button>
       </div>
 
-      {error && <div className="notice error">{error}</div>}
-      {saveMessage && <div className="notice success">{saveMessage}</div>}
+      {error && <div className="notice notice-error">{error}</div>}
+      {success && <div className="notice notice-success">{success}</div>}
 
       {!lesson.studentGroup?.id && (
-        <div className="card empty">
-          <h3>No group assigned</h3>
-          <p>Assign a student group to this lesson to manage attendance.</p>
-        </div>
+        <div className="card empty-row">Assign a student group to this lesson first.</div>
       )}
 
       {lesson.studentGroup?.id && (
-        <div className="attendance-panel">
-          <div className="panel-header">
-            <div>
-              <h2>Students</h2>
-              <p>{group?.students?.length || students.length} students in this group</p>
-            </div>
-            <button className="btn" onClick={handleSave} disabled={saving}>
-              {saving ? "Saving..." : "Save attendance"}
-            </button>
-          </div>
-
-          <div className="attendance-table">
-            <div className="attendance-row header">
-              <div>Student</div>
-              <div>Current</div>
-              <div>Update</div>
-            </div>
-
-            {students.map((student) => {
-              const existing = attendanceMap[student.id];
-              const currentMark = existing?.attendanceMark || "—";
-              return (
-                <div key={student.id} className="attendance-row">
-                  <div className="student-info">
-                    <strong>{student.lastName || ""} {student.name || "Student"}</strong>
-                    <span className="muted">{student.email || "No email"}</span>
-                  </div>
-                  <div>
-                    <StatusPill
-                      text={currentMark}
-                      tone={currentMark === "PRESENT" ? "success" : currentMark === "ABSENT" ? "danger" : "neutral"}
-                    />
-                  </div>
-                  <div className="radio-group">
-                    {MARKS.map((mark) => (
-                      <label key={mark} className={`radio-pill ${selectionMap[student.id] === mark ? "active" : ""}`}>
-                        <input
-                          type="radio"
-                          name={`attendance-${student.id}`}
-                          value={mark}
-                          checked={selectionMap[student.id] === mark}
-                          onChange={() => handleSelect(student.id, mark)}
-                        />
-                        {mark}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-
-            {students.length === 0 && (
-              <div className="card empty">
-                <h3>No students in this group</h3>
-                <p>Add students to the group to manage attendance.</p>
-              </div>
-            )}
+        <div className="card table-card">
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Current</th>
+                  <th>Update</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="empty-row">No students in this group</td>
+                  </tr>
+                )}
+                {students.map((student) => {
+                  const existing = attendanceByStudentId[student.id];
+                  return (
+                    <tr key={student.id}>
+                      <td>{student.lastName} {student.name}</td>
+                      <td>{existing?.attendanceMark || "-"}</td>
+                      <td>
+                        <div className="radio-group">
+                          {MARKS.map((mark) => (
+                            <label key={mark} className="radio-pill">
+                              <input
+                                type="radio"
+                                name={`student-${student.id}`}
+                                checked={selectionMap[student.id] === mark}
+                                onChange={() => setSelectionMap((prev) => ({ ...prev, [student.id]: mark }))}
+                              />
+                              {mark}
+                            </label>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      <div className="card info-card">
-        <div>
-          <h3>Attendance recap</h3>
-          <p>Current saved records for this lesson.</p>
-        </div>
-        <div className="recap-grid">
-          {MARKS.map((mark) => {
-            const count = attendanceList.filter((item) => item.attendanceMark === mark).length;
-            return (
-              <div key={mark} className="recap-item">
-                <div className="recap-count">{count}</div>
-                <div className="recap-label">{mark}</div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="card recap-card">
+        {recap.map((item) => (
+          <div key={item.mark} className="recap-item">
+            <strong>{item.count}</strong>
+            <span>{item.mark}</span>
+          </div>
+        ))}
       </div>
     </section>
   );
