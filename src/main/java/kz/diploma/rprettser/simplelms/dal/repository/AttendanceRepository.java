@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
-    Optional<Attendance> findFirstByStudentIdAndLessonId(Long studentId, Long studentId1);
+    Optional<Attendance> findFirstByStudentIdAndLessonId(Long studentId, Long lessonId);
 }

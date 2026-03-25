@@ -85,7 +85,7 @@ public class StudentGroupServiceImpl implements StudentGroupService {
 
         if (!students.isEmpty()) {
             studentGroup.removeAllStudents();
-            studentGroup.setStudents(students);
+            students.forEach(studentGroup::addStudent);
         }
 
         setIfNotNull(studentGroupDto.getName(), studentGroup::setName);

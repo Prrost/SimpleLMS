@@ -31,7 +31,7 @@ public class StudentGroup {
     )
     private Set<Student> students = new HashSet<>();
 
-    @Column(name = "isVirtual")
+    @Column(name = "is_virtual")
     private Boolean isVirtual;
 
     @Column(name = "created_at")
