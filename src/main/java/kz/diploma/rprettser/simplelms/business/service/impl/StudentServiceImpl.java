@@ -137,8 +137,9 @@ public class StudentServiceImpl implements StudentService {
             studentGroups.addAll(foundStudentGroups);
         }
 
+        student.removeAllStudentGroups();
+
         if (!studentGroups.isEmpty()){
-            student.removeAllStudentGroups();
             studentGroups.forEach(student::addStudentGroup);
         }
 
