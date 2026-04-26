@@ -17,5 +17,5 @@ public interface StudentService {
     Student createStudent(StudentRequestDto studentDto);
     Student updateStudent(Long id, StudentRequestDto studentDto);
     Student deleteStudent(Long id);
-    Optional<Student> findStudentByStudentName(String studentName);
+    Optional<Student> findStudentByStudentFullName(String studentName, String studentLastName);
 }

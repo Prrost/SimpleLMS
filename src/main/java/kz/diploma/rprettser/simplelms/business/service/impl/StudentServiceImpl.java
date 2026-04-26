@@ -3,7 +3,6 @@ package kz.diploma.rprettser.simplelms.business.service.impl;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import kz.diploma.rprettser.simplelms.business.dto.request.StudentRequestDto;
-import kz.diploma.rprettser.simplelms.business.dto.response.StudentResponseDto;
 import kz.diploma.rprettser.simplelms.business.service.StudentGroupService;
 import kz.diploma.rprettser.simplelms.business.service.StudentService;
 import kz.diploma.rprettser.simplelms.common.constant.Constant;
@@ -166,7 +165,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Optional<Student> findStudentByStudentName(String studentName) {
-        return studentRepository.findByName(studentName);
+    public Optional<Student> findStudentByStudentFullName(String studentName, String studentLastName) {
+        return studentRepository.findByNameAndLastName(studentName, studentLastName);
     }
 }

@@ -93,7 +93,9 @@ public class AttendanceFacadeImpl implements AttendanceFacade {
         ifNullThrow(request.getStudentName(), "Student name is null");
         ifNullThrow(request.getLessonName(), "Lesson name is null");
         ifNullThrow(request.getAttendanceMark(), "Attendance mark is null");
-        Student student = studentService.findStudentByStudentName(request.getStudentName()).orElseThrow(() -> new NoSuchElementException("Student not found with name: " + request.getStudentName()));
+        String firstName = request.getStudentName().split(" ")[0];
+        String lastName = request.getStudentName().split(" ")[1];
+        Student student = studentService.findStudentByStudentFullName(firstName, lastName).orElseThrow(() -> new NoSuchElementException("Student not found with name: " + request.getStudentName()));
         Lesson lesson = lessonService.findLessonByLessonName(request.getLessonName()).orElseThrow(() -> new NoSuchElementException("Lesson not found with name: " + request.getLessonName()));
 
         Attendance att = attendanceService.findByStudentIdAndLessonId(student.getId(), lesson.getId()).orElseThrow(() -> new NoSuchElementException("Attendance not found for student: " + student.getName() + " and lesson: " + lesson.getName()));
