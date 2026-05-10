@@ -18,8 +18,7 @@ const initialForm = {
   classroomId: null,
   studentGroupId: null,
   startsAt: "",
-  endsAt: "",
-  expiresAt: ""
+  endsAt: ""
 };
 
 function toInputDateTime(value) {
@@ -84,8 +83,7 @@ export default function LessonListPage() {
         classroomId: toNumber(form.classroomId),
         studentGroupId: toNumber(form.studentGroupId),
         startsAt: form.startsAt || null,
-        endsAt: form.endsAt || null,
-        expiresAt: form.expiresAt || null
+        endsAt: form.endsAt || null
       };
 
       if (editingId) {
@@ -112,8 +110,7 @@ export default function LessonListPage() {
       classroomId: lesson.classroom?.id ?? null,
       studentGroupId: lesson.studentGroup?.id ?? null,
       startsAt: toInputDateTime(lesson.startsAt),
-      endsAt: toInputDateTime(lesson.endsAt),
-      expiresAt: toInputDateTime(lesson.expiresAt)
+      endsAt: toInputDateTime(lesson.endsAt)
     });
   };
 
@@ -168,11 +165,6 @@ export default function LessonListPage() {
             Ends at
             <input type="datetime-local" value={form.endsAt} onChange={(e) => setForm((p) => ({ ...p, endsAt: e.target.value }))} />
           </label>
-          <label className="field">
-            Expires at
-            <input type="datetime-local" value={form.expiresAt} onChange={(e) => setForm((p) => ({ ...p, expiresAt: e.target.value }))} />
-          </label>
-
           <button type="submit" className="btn" disabled={saving}>{saving ? "Saving..." : editingId ? "Update lesson" : "Create lesson"}</button>
           {editingId && (
             <button type="button" className="btn btn-secondary" onClick={resetForm}>

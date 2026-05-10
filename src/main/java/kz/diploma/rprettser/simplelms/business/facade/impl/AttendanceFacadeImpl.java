@@ -98,12 +98,18 @@ public class AttendanceFacadeImpl implements AttendanceFacade {
         Student student = studentService.findStudentByStudentFullName(firstName, lastName).orElseThrow(() -> new NoSuchElementException("Student not found with name: " + request.getStudentName()));
         Lesson lesson = lessonService.findLessonByLessonName(request.getLessonName()).orElseThrow(() -> new NoSuchElementException("Lesson not found with name: " + request.getLessonName()));
 
-        Attendance att = attendanceService.findByStudentIdAndLessonId(student.getId(), lesson.getId()).orElseThrow(() -> new NoSuchElementException("Attendance not found for student: " + student.getName() + " and lesson: " + lesson.getName()));
-
-        Attendance changedAtt =  attendanceService.updateAttendance(
-                att.getId(),
-                AttendanceRequestDto.builder().attendanceMark(request.getAttendanceMark()).build()
-        );
+        Attendance changedAtt = attendanceService.findByStudentIdAndLessonId(student.getId(), lesson.getId())
+                .map(att -> attendanceService.updateAttendance(
+                        att.getId(),
+                        AttendanceRequestDto.builder().attendanceMark(request.getAttendanceMark()).build()
+                ))
+                .orElseGet(() -> attendanceService.createAttendance(
+                        AttendanceRequestDto.builder()
+                                .studentId(student.getId())
+                                .lessonId(lesson.getId())
+                                .attendanceMark(request.getAttendanceMark())
+                                .build()
+                ));
 
         return mapper.toAttendanceResponseDto(changedAtt);
     }
