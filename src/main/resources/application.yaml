@@ -38,7 +38,7 @@ springdoc:
     version: OPENAPI_3_0
 
 simple_lms:
-  timezone: ${APP_TIMEZONE:Europe/Almaty}
+  timezone: ${APP_TIMEZONE:Asia/Almaty}
 
 server:
   port: 8080

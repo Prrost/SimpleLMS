@@ -9,7 +9,7 @@ import java.util.TimeZone;
 @Configuration
 public class TimezoneConfig {
 
-    @Value("${simple_lms.timezone:Europe/Almaty}")
+    @Value("${simple_lms.timezone:Asia/Almaty}")
     private String timezone;
 
     @PostConstruct
