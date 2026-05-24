@@ -1,6 +1,7 @@
 package kz.diploma.rprettser.simplelms.business.facade.impl;
 
 import jakarta.transaction.Transactional;
+import kz.diploma.rprettser.simplelms.business.dto.request.LessonRepeatRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.request.LessonRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.LessonResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.LessonFacade;
@@ -78,5 +79,13 @@ public class LessonFacadeImpl implements LessonFacade {
         Lesson lesson = lessonService.deleteLesson(id);
 
         return mapper.toLessonResponseDto(lesson);
+    }
+
+    @Override
+    @Transactional
+    public List<LessonResponseDto> repeatLesson(Long id, LessonRepeatRequestDto dto) {
+        List<Lesson> lessons = lessonService.repeatLesson(id, dto.getWeeks());
+
+        return mapper.toListLessonResponseDto(lessons);
     }
 }

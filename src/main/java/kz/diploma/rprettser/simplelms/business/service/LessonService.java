@@ -24,4 +24,6 @@ public interface LessonService {
     Lesson deleteLesson(Long id);
 
     Optional<Lesson> findLessonByLessonName(String lessonName);
+
+    List<Lesson> repeatLesson(Long id, int weeks);
 }

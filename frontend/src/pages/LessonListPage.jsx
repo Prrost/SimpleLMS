@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { createEntity, fetchPage, updateEntity } from "../api.js";
+import { createEntity, fetchPage, repeatLesson, updateEntity } from "../api.js";
 import EntityLookupSelect from "../components/EntityLookupSelect.jsx";
 import Pagination from "../components/Pagination.jsx";
 import { formatDateTime, toNumber } from "../utils.js";
@@ -35,6 +35,9 @@ export default function LessonListPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [repeatModal, setRepeatModal] = useState(null); // lesson object or null
+  const [repeatWeeks, setRepeatWeeks] = useState(4);
+  const [repeating, setRepeating] = useState(false);
 
   const load = async (page = 0, activeFilters = filters) => {
     setLoading(true);
@@ -112,6 +115,28 @@ export default function LessonListPage() {
       startsAt: toInputDateTime(lesson.startsAt),
       endsAt: toInputDateTime(lesson.endsAt)
     });
+  };
+
+  const openRepeatModal = (lesson) => {
+    setRepeatModal(lesson);
+    setRepeatWeeks(4);
+  };
+
+  const handleRepeat = async () => {
+    if (!repeatModal || repeating) return;
+    setRepeating(true);
+    setError("");
+    setSuccess("");
+    try {
+      const created = await repeatLesson(repeatModal.id, repeatWeeks);
+      setSuccess(`Created ${created.length} lesson(s)`);
+      setRepeatModal(null);
+      await load(0);
+    } catch (err) {
+      setError(err.message || "Failed to repeat lesson");
+    } finally {
+      setRepeating(false);
+    }
   };
 
   const lessons = pageData?.content ?? [];
@@ -248,6 +273,9 @@ export default function LessonListPage() {
                       <Link className="table-link" to={`/lessons/${lesson.id}/attendance`}>
                         Attendance
                       </Link>
+                      <button type="button" className="btn btn-secondary" onClick={() => openRepeatModal(lesson)}>
+                        Repeat
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -257,6 +285,59 @@ export default function LessonListPage() {
         </div>
         <Pagination pageData={pageData} onPageChange={(page) => load(page)} />
       </div>
+      {repeatModal && (
+        <div style={styles.overlay} onClick={() => setRepeatModal(null)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginBottom: "8px" }}>Repeat lesson</h2>
+            <p style={{ color: "#666", fontSize: "0.85rem", marginBottom: "20px" }}>
+              {repeatModal.name}
+            </p>
+            <label style={styles.modalLabel}>
+              Number of weeks
+              <input
+                type="number"
+                min="1"
+                max="52"
+                value={repeatWeeks}
+                onChange={(e) => setRepeatWeeks(Number(e.target.value))}
+                style={styles.modalInput}
+                autoFocus
+              />
+            </label>
+            <div style={{ display: "flex", gap: "10px", marginTop: "24px" }}>
+              <button className="btn" onClick={handleRepeat} disabled={repeating} style={{ flex: 1 }}>
+                {repeating ? "Creating..." : `Create ${repeatWeeks} lesson(s)`}
+              </button>
+              <button className="btn btn-secondary" onClick={() => setRepeatModal(null)} style={{ flex: 1 }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
+
+const styles = {
+  overlay: {
+    position: "fixed", inset: 0,
+    background: "rgba(0,0,0,0.45)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    background: "#fff", borderRadius: "14px",
+    padding: "28px 32px", width: "340px",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+  },
+  modalLabel: {
+    display: "flex", flexDirection: "column", gap: "6px",
+    fontSize: "0.85rem", fontWeight: 500, color: "#555",
+  },
+  modalInput: {
+    padding: "9px 12px", borderRadius: "8px",
+    border: "1px solid #ddd", fontSize: "1rem",
+    outline: "none", width: "100%",
+  },
+};

@@ -1,5 +1,6 @@
 package kz.diploma.rprettser.simplelms.business.facade;
 
+import kz.diploma.rprettser.simplelms.business.dto.request.LessonRepeatRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.request.LessonRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.LessonResponseDto;
 import org.springframework.data.domain.Page;
@@ -21,4 +22,6 @@ public interface LessonFacade {
     LessonResponseDto updateLesson(Long id, LessonRequestDto lessonRequestDto);
 
     LessonResponseDto deleteLesson(Long id);
+
+    List<LessonResponseDto> repeatLesson(Long id, LessonRepeatRequestDto dto);
 }

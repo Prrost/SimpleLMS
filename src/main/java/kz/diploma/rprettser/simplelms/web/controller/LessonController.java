@@ -1,5 +1,6 @@
 package kz.diploma.rprettser.simplelms.web.controller;
 
+import kz.diploma.rprettser.simplelms.business.dto.request.LessonRepeatRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.request.LessonRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.LessonResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.LessonFacade;
@@ -55,6 +56,14 @@ public class LessonController {
             @Valid @RequestBody LessonRequestDto lessonRequestDto
     ){
         return lessonFacade.updateLesson(id, lessonRequestDto);
+    }
+
+    @PostMapping("/{id}/repeat")
+    public List<LessonResponseDto> repeatLesson(
+            @PathVariable Long id,
+            @Valid @RequestBody LessonRepeatRequestDto dto
+    ){
+        return lessonFacade.repeatLesson(id, dto);
     }
 
     @DeleteMapping("/{id}")

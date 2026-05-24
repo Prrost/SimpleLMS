@@ -62,3 +62,11 @@ export function updateEntity(endpoint, id, payload) {
 export function fetchById(endpoint, id) {
   return request(`${endpoint}/${id}`);
 }
+
+export function repeatLesson(id, weeks) {
+  return request(`/api/lesson/${id}/repeat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ weeks })
+  });
+}
