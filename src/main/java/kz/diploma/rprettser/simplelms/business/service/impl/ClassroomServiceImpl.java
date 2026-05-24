@@ -60,6 +60,10 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     @Override
     public Classroom createClassroom(ClassroomRequestDto classroomDto) {
+        classroomRepository.findByNameAndIsDeletedFalse(classroomDto.getName()).ifPresent(c -> {
+            throw new IllegalArgumentException("Classroom with name '" + classroomDto.getName() + "' already exists");
+        });
+
         Classroom classroom = Classroom.builder()
                 .name(classroomDto.getName())
                 .createdBy(Constant.SYSTEM)
@@ -76,6 +80,14 @@ public class ClassroomServiceImpl implements ClassroomService {
     public Classroom updateClassroom(Long id, ClassroomRequestDto classroomDto) {
         Classroom classroom = this.getClassroomById(id)
                 .orElseThrow(() -> new NoSuchElementException("No classroom found with id: " + id));
+
+        if (classroomDto.getName() != null) {
+            classroomRepository.findByNameAndIsDeletedFalse(classroomDto.getName())
+                    .filter(c -> !c.getId().equals(id))
+                    .ifPresent(c -> {
+                        throw new IllegalArgumentException("Classroom with name '" + classroomDto.getName() + "' already exists");
+                    });
+        }
 
         setIfNotNull(classroomDto.getName(), classroom::setName);
         classroom.setUpdatedBy(Constant.SYSTEM);

@@ -1,10 +1,10 @@
 package kz.diploma.rprettser.simplelms.business.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Builder
@@ -13,6 +13,7 @@ import java.util.Set;
 public class StudentGroupRequestDto {
     private Long id;
 
+    @NotBlank
     private String name;
 
     private Set<Long> studentIds;

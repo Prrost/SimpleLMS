@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class LessonController {
 
     @PostMapping()
     public LessonResponseDto createLesson(
-            @RequestBody LessonRequestDto lessonRequestDto
+            @Valid @RequestBody LessonRequestDto lessonRequestDto
     ){
         return lessonFacade.createLesson(lessonRequestDto);
     }
@@ -51,7 +52,7 @@ public class LessonController {
     @PutMapping("/{id}")
     public LessonResponseDto updateLesson(
             @PathVariable Long id,
-            @RequestBody LessonRequestDto lessonRequestDto
+            @Valid @RequestBody LessonRequestDto lessonRequestDto
     ){
         return lessonFacade.updateLesson(id, lessonRequestDto);
     }

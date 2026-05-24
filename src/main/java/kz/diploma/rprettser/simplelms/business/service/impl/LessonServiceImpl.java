@@ -72,6 +72,15 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public Lesson createLesson(LessonRequestDto lessonDto) {
+        lessonRepository.findByNameAndIsDeletedFalse(lessonDto.getName()).ifPresent(l -> {
+            throw new IllegalArgumentException("Lesson with name '" + lessonDto.getName() + "' already exists");
+        });
+
+        if (lessonDto.getStartsAt() != null && lessonDto.getEndsAt() != null
+                && !lessonDto.getStartsAt().isBefore(lessonDto.getEndsAt())) {
+            throw new IllegalArgumentException("Lesson start time must be before end time");
+        }
+
         Classroom classroom = null;
         StudentGroup studentGroup = null;
 
@@ -106,6 +115,20 @@ public class LessonServiceImpl implements LessonService {
     public Lesson updateLesson(Long id, LessonRequestDto lessonDto) {
         Lesson lesson = this.getLessonById(id)
                 .orElseThrow(() -> new NoSuchElementException("No lesson found with id: " + id));
+
+        if (lessonDto.getName() != null) {
+            lessonRepository.findByNameAndIsDeletedFalse(lessonDto.getName())
+                    .filter(l -> !l.getId().equals(id))
+                    .ifPresent(l -> {
+                        throw new IllegalArgumentException("Lesson with name '" + lessonDto.getName() + "' already exists");
+                    });
+        }
+
+        LocalDateTime effectiveStart = lessonDto.getStartsAt() != null ? lessonDto.getStartsAt() : lesson.getStartsAt();
+        LocalDateTime effectiveEnd = lessonDto.getEndsAt() != null ? lessonDto.getEndsAt() : lesson.getEndsAt();
+        if (effectiveStart != null && effectiveEnd != null && !effectiveStart.isBefore(effectiveEnd)) {
+            throw new IllegalArgumentException("Lesson start time must be before end time");
+        }
 
         if (lessonDto.getClassroomId() != null) {
             Classroom classroom = classroomService.getClassroomById(lessonDto.getClassroomId())

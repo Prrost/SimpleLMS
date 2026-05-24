@@ -70,6 +70,10 @@ public class StudentGroupServiceImpl implements StudentGroupService {
 
     @Override
     public StudentGroup createStudentGroup(StudentGroupRequestDto studentGroupDto) {
+        studentGroupRepository.findByNameAndIsDeletedFalse(studentGroupDto.getName()).ifPresent(g -> {
+            throw new IllegalArgumentException("Student group with name '" + studentGroupDto.getName() + "' already exists");
+        });
+
         Set<Student> students = new HashSet<>();
 
         if (studentGroupDto.getStudentIds() != null) {
@@ -102,6 +106,14 @@ public class StudentGroupServiceImpl implements StudentGroupService {
     public StudentGroup updateStudentGroup(Long id, StudentGroupRequestDto studentGroupDto) {
         StudentGroup studentGroup = this.getStudentGroupById(id)
                 .orElseThrow(() -> new NoSuchElementException("No student group found with id: " + id));
+
+        if (studentGroupDto.getName() != null) {
+            studentGroupRepository.findByNameAndIsDeletedFalse(studentGroupDto.getName())
+                    .filter(g -> !g.getId().equals(id))
+                    .ifPresent(g -> {
+                        throw new IllegalArgumentException("Student group with name '" + studentGroupDto.getName() + "' already exists");
+                    });
+        }
 
         Set<Student> students = new HashSet<>();
 

@@ -83,6 +83,10 @@ public class StudentServiceImpl implements StudentService {
     @Override
     @Transactional
     public Student createStudent(StudentRequestDto studentDto) {
+        studentRepository.findByNameAndLastNameAndIsDeletedFalse(studentDto.getName(), studentDto.getLastName()).ifPresent(s -> {
+            throw new IllegalArgumentException("Student '" + studentDto.getName() + " " + studentDto.getLastName() + "' already exists");
+        });
+
         Set<StudentGroup> studentGroups = new HashSet<>();
 
         if (studentDto.getStudentGroupsIds() != null) {
@@ -120,6 +124,14 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public Student updateStudent(Long id, StudentRequestDto studentDto) {
         Student student = this.getStudentById(id).orElseThrow(() -> new NoSuchElementException("No student found with id: " + id));
+
+        if (studentDto.getName() != null && studentDto.getLastName() != null) {
+            studentRepository.findByNameAndLastNameAndIsDeletedFalse(studentDto.getName(), studentDto.getLastName())
+                    .filter(s -> !s.getId().equals(id))
+                    .ifPresent(s -> {
+                        throw new IllegalArgumentException("Student '" + studentDto.getName() + " " + studentDto.getLastName() + "' already exists");
+                    });
+        }
 
         Set<StudentGroup> studentGroups = new HashSet<>();
 

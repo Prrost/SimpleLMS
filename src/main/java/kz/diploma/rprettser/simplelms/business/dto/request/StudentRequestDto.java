@@ -1,8 +1,7 @@
 package kz.diploma.rprettser.simplelms.business.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,8 +14,10 @@ public class StudentRequestDto {
 
     private Long id;
 
+    @NotBlank
     private String name;
 
+    @NotBlank
     private String lastName;
 
     private String email;

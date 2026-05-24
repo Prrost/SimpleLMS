@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class ClassroomController {
 
     @PostMapping()
     public ClassroomResponseDto createClassroom(
-            @RequestBody ClassroomRequestDto classroomRequestDto
+            @Valid @RequestBody ClassroomRequestDto classroomRequestDto
     ){
         return classroomFacade.createClassroom(classroomRequestDto);
     }
@@ -50,7 +51,7 @@ public class ClassroomController {
     @PutMapping("/{id}")
     public ClassroomResponseDto updateClassroom(
             @PathVariable Long id,
-            @RequestBody ClassroomRequestDto classroomRequestDto
+            @Valid @RequestBody ClassroomRequestDto classroomRequestDto
     ){
         return classroomFacade.updateClassroom(id, classroomRequestDto);
     }

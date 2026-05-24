@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public class StudentController {
 
     @PostMapping()
     public StudentResponseDto createStudent(
-            @RequestBody StudentRequestDto studentRequestDto
+            @Valid @RequestBody StudentRequestDto studentRequestDto
     ){
         return studentFacade.createStudent(studentRequestDto);
     }
@@ -55,7 +56,7 @@ public class StudentController {
     @PutMapping("/{id}")
     public StudentResponseDto updateStudent(
             @PathVariable Long id,
-            @RequestBody StudentRequestDto studentRequestDto
+            @Valid @RequestBody StudentRequestDto studentRequestDto
     ){
         return studentFacade.updateStudent(id, studentRequestDto);
     }

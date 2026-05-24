@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpecificationExecutor<Student> {
     Optional<Student> findByNameAndLastName(String name, String lastName);
+    Optional<Student> findByNameAndLastNameAndIsDeletedFalse(String name, String lastName);
 }

@@ -1,6 +1,7 @@
 package kz.diploma.rprettser.simplelms.business.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,5 +12,6 @@ public class ClassroomRequestDto {
 
     private Long id;
 
+    @NotBlank
     private String name;
 }

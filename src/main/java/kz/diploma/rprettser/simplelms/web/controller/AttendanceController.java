@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,7 +53,7 @@ public class AttendanceController {
 
     @PostMapping()
     public AttendanceResponseDto createAttendance(
-            @RequestBody AttendanceRequestDto attendanceRequestDto
+            @Valid @RequestBody AttendanceRequestDto attendanceRequestDto
     ){
         return attendanceFacade.createAttendance(attendanceRequestDto);
     }
@@ -60,14 +61,14 @@ public class AttendanceController {
     @PutMapping("/{id}")
     public AttendanceResponseDto updateAttendance(
             @PathVariable Long id,
-            @RequestBody AttendanceRequestDto attendanceRequestDto
+            @Valid @RequestBody AttendanceRequestDto attendanceRequestDto
     ){
         return attendanceFacade.updateAttendance(id, attendanceRequestDto);
     }
 
     @PostMapping("/set_attendance")
     public AttendanceResponseDto setAttendance(
-            @RequestBody AttendanceRequestDto request
+            @Valid @RequestBody AttendanceRequestDto request
     ){
         return attendanceFacade.setAttendanceForStudent(request);
     }

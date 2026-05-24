@@ -78,6 +78,15 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public Attendance createAttendance(AttendanceRequestDto attendanceDto) {
+        if (attendanceDto.getStudentId() != null && attendanceDto.getLessonId() != null) {
+            attendanceRepository.findFirstByStudentIdAndLessonIdAndIsDeletedFalse(
+                    attendanceDto.getStudentId(), attendanceDto.getLessonId()
+            ).ifPresent(a -> {
+                throw new IllegalArgumentException("Attendance record for student " + attendanceDto.getStudentId()
+                        + " and lesson " + attendanceDto.getLessonId() + " already exists");
+            });
+        }
+
         Student student = null;
         Lesson lesson = null;
 
