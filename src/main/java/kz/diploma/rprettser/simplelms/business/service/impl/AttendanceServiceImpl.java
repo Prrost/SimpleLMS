@@ -10,6 +10,7 @@ import kz.diploma.rprettser.simplelms.common.constant.Constant;
 import kz.diploma.rprettser.simplelms.dal.entity.Attendance;
 import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
+import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
 import kz.diploma.rprettser.simplelms.dal.enums.AttendanceMark;
 import kz.diploma.rprettser.simplelms.dal.repository.AttendanceRepository;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +70,8 @@ public class AttendanceServiceImpl implements AttendanceService {
                     // Invalid enum value, ignore this predicate
                 }
             }
+
+            predicates.add(criteriaBuilder.equal(root.get("isDeleted"), false));
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
@@ -152,6 +155,34 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public Optional<Attendance> findByStudentIdAndLessonId(Long studentId, Long lessonId) {
-        return attendanceRepository.findFirstByStudentIdAndLessonId(studentId, lessonId);
+        return attendanceRepository.findFirstByStudentIdAndLessonIdAndIsDeletedFalse(studentId, lessonId);
+    }
+
+    @Override
+    @Transactional
+    public List<Attendance> initAttendancesForLesson(Lesson lesson) {
+        StudentGroup group = lesson.getStudentGroup();
+        if (group == null) {
+            return List.of();
+        }
+
+        List<Attendance> created = new ArrayList<>();
+        for (Student student : group.getStudents()) {
+            if (attendanceRepository.findFirstByStudentIdAndLessonIdAndIsDeletedFalse(student.getId(), lesson.getId()).isPresent()) {
+                continue;
+            }
+            Attendance attendance = Attendance.builder()
+                    .student(student)
+                    .lesson(lesson)
+                    .attendanceMark(null)
+                    .createdBy(Constant.SYSTEM)
+                    .updatedBy(Constant.SYSTEM)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .isDeleted(false)
+                    .build();
+            created.add(attendanceRepository.save(attendance));
+        }
+        return created;
     }
 }

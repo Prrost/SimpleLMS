@@ -8,6 +8,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, Long>, JpaSpecificationExecutor<Attendance> {
-    Optional<Attendance> findFirstByStudentIdAndLessonId(Long studentId, Long lessonId);
     Optional<Attendance> findFirstByStudentIdAndLessonIdAndIsDeletedFalse(Long studentId, Long lessonId);
 }

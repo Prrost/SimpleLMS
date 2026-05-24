@@ -2,6 +2,7 @@ package kz.diploma.rprettser.simplelms.business.service;
 
 import kz.diploma.rprettser.simplelms.business.dto.request.AttendanceRequestDto;
 import kz.diploma.rprettser.simplelms.dal.entity.Attendance;
+import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -24,4 +25,6 @@ public interface AttendanceService {
     Attendance deleteAttendance(Long id);
 
     Optional<Attendance> findByStudentIdAndLessonId(Long studentId, Long lessonId);
+
+    List<Attendance> initAttendancesForLesson(Lesson lesson);
 }

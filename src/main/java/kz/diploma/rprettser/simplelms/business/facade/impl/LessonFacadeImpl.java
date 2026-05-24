@@ -6,6 +6,7 @@ import kz.diploma.rprettser.simplelms.business.dto.request.LessonRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.LessonResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.LessonFacade;
 import kz.diploma.rprettser.simplelms.business.mapper.Mapper;
+import kz.diploma.rprettser.simplelms.business.service.AttendanceService;
 import kz.diploma.rprettser.simplelms.business.service.LessonService;
 import kz.diploma.rprettser.simplelms.dal.entity.Lesson;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.NoSuchElementException;
 public class LessonFacadeImpl implements LessonFacade {
 
     private final LessonService lessonService;
+    private final AttendanceService attendanceService;
     private final Mapper mapper;
 
     @Override
@@ -61,6 +63,7 @@ public class LessonFacadeImpl implements LessonFacade {
     @Transactional
     public LessonResponseDto createLesson(LessonRequestDto lessonRequestDto) {
         Lesson lesson = lessonService.createLesson(lessonRequestDto);
+        attendanceService.initAttendancesForLesson(lesson);
 
         return mapper.toLessonResponseDto(lesson);
     }
@@ -85,6 +88,7 @@ public class LessonFacadeImpl implements LessonFacade {
     @Transactional
     public List<LessonResponseDto> repeatLesson(Long id, LessonRepeatRequestDto dto) {
         List<Lesson> lessons = lessonService.repeatLesson(id, dto.getWeeks());
+        lessons.forEach(attendanceService::initAttendancesForLesson);
 
         return mapper.toListLessonResponseDto(lessons);
     }
