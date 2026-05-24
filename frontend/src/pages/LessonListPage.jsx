@@ -270,12 +270,12 @@ export default function LessonListPage() {
                       <button type="button" className="btn btn-secondary" onClick={() => startEdit(lesson)}>
                         Edit
                       </button>
-                      <Link className="table-link" to={`/lessons/${lesson.id}/attendance`}>
-                        Attendance
-                      </Link>
                       <button type="button" className="btn btn-secondary" onClick={() => openRepeatModal(lesson)}>
                         Repeat
                       </button>
+                      <Link className="btn btn-secondary" to={`/lessons/${lesson.id}/attendance`}>
+                        Attendance
+                      </Link>
                     </div>
                   </td>
                 </tr>
