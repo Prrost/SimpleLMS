@@ -1,6 +1,7 @@
 package kz.diploma.rprettser.simplelms.web.controller;
 
 import kz.diploma.rprettser.simplelms.business.dto.request.AttendanceRequestDto;
+import kz.diploma.rprettser.simplelms.business.dto.request.SetAttendanceRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.AttendanceResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.AttendanceFacade;
 import kz.diploma.rprettser.simplelms.business.mapper.Mapper;
@@ -68,7 +69,7 @@ public class AttendanceController {
 
     @PostMapping("/set_attendance")
     public AttendanceResponseDto setAttendance(
-            @Valid @RequestBody AttendanceRequestDto request
+            @Valid @RequestBody SetAttendanceRequestDto request
     ){
         return attendanceFacade.setAttendanceForStudent(request);
     }

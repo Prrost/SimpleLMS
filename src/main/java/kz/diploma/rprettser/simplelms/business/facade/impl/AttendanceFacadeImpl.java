@@ -1,6 +1,7 @@
 package kz.diploma.rprettser.simplelms.business.facade.impl;
 
 import kz.diploma.rprettser.simplelms.business.dto.request.AttendanceRequestDto;
+import kz.diploma.rprettser.simplelms.business.dto.request.SetAttendanceRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.AttendanceResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.AttendanceFacade;
 import kz.diploma.rprettser.simplelms.business.mapper.Mapper;
@@ -18,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import static kz.diploma.rprettser.simplelms.common.utils.ObjectUtil.ifNullThrow;
 
 @RequiredArgsConstructor
 @Component
@@ -89,10 +88,7 @@ public class AttendanceFacadeImpl implements AttendanceFacade {
 
     @Override
     @Transactional
-    public AttendanceResponseDto setAttendanceForStudent(AttendanceRequestDto request) {
-        ifNullThrow(request.getStudentName(), "Student name is null");
-        ifNullThrow(request.getLessonName(), "Lesson name is null");
-        ifNullThrow(request.getAttendanceMark(), "Attendance mark is null");
+    public AttendanceResponseDto setAttendanceForStudent(SetAttendanceRequestDto request) {
         String firstName = request.getStudentName().split(" ")[0];
         String lastName = request.getStudentName().split(" ")[1];
         Student student = studentService.findStudentByStudentFullName(firstName, lastName).orElseThrow(() -> new NoSuchElementException("Student not found with name: " + request.getStudentName()));

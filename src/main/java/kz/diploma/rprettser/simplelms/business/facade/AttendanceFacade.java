@@ -1,6 +1,7 @@
 package kz.diploma.rprettser.simplelms.business.facade;
 
 import kz.diploma.rprettser.simplelms.business.dto.request.AttendanceRequestDto;
+import kz.diploma.rprettser.simplelms.business.dto.request.SetAttendanceRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.AttendanceResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +21,7 @@ public interface AttendanceFacade {
 
     AttendanceResponseDto deleteAttendance(Long id);
 
-    AttendanceResponseDto setAttendanceForStudent(AttendanceRequestDto request);
+    AttendanceResponseDto setAttendanceForStudent(SetAttendanceRequestDto request);
 
     Page<AttendanceResponseDto> searchAttendances(Long studentId, Long lessonId, String attendanceMark, Pageable pageable);
 }
