@@ -5,6 +5,8 @@ import kz.diploma.rprettser.simplelms.business.dto.request.StudentRequestDto;
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.StudentFacade;
 import kz.diploma.rprettser.simplelms.business.mapper.Mapper;
+import kz.diploma.rprettser.simplelms.business.service.AttendanceService;
+import kz.diploma.rprettser.simplelms.business.service.LessonService;
 import kz.diploma.rprettser.simplelms.business.service.StudentService;
 import kz.diploma.rprettser.simplelms.dal.entity.Student;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ import java.util.NoSuchElementException;
 public class StudentFacadeImpl implements StudentFacade {
 
     private final StudentService studentService;
+    private final LessonService lessonService;
+    private final AttendanceService attendanceService;
     private final Mapper mapper;
 
     @Override
@@ -59,6 +63,8 @@ public class StudentFacadeImpl implements StudentFacade {
     public StudentResponseDto createStudent(StudentRequestDto studentRequestDto) {
         Student student = studentService.createStudent(studentRequestDto);
 
+        initAttendancesForStudentGroups(student);
+
         return mapper.toStudentResponseDto(student);
     }
 
@@ -66,6 +72,8 @@ public class StudentFacadeImpl implements StudentFacade {
     @Transactional
     public StudentResponseDto updateStudent(Long id, StudentRequestDto studentRequestDto) {
         Student student = studentService.updateStudent(id, studentRequestDto);
+
+        initAttendancesForStudentGroups(student);
 
         return mapper.toStudentResponseDto(student);
     }
@@ -76,5 +84,14 @@ public class StudentFacadeImpl implements StudentFacade {
         Student student = studentService.deleteStudent(id);
 
         return mapper.toStudentResponseDto(student);
+    }
+
+    private void initAttendancesForStudentGroups(Student student) {
+        if (student.getStudentGroups() == null) {
+            return;
+        }
+        student.getStudentGroups().forEach(group ->
+                lessonService.getLessonsByStudentGroupId(group.getId())
+                        .forEach(attendanceService::initAttendancesForLesson));
     }
 }

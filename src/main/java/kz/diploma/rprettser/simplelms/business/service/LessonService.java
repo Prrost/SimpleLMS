@@ -25,5 +25,7 @@ public interface LessonService {
 
     Optional<Lesson> findLessonByLessonName(String lessonName);
 
+    List<Lesson> getLessonsByStudentGroupId(Long studentGroupId);
+
     List<Lesson> repeatLesson(Long id, int weeks);
 }

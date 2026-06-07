@@ -180,6 +180,11 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
+    public List<Lesson> getLessonsByStudentGroupId(Long studentGroupId) {
+        return lessonRepository.findAllByStudentGroupIdAndIsDeletedFalse(studentGroupId);
+    }
+
+    @Override
     @Transactional
     public List<Lesson> repeatLesson(Long id, int weeks) {
         Lesson source = this.getLessonById(id)

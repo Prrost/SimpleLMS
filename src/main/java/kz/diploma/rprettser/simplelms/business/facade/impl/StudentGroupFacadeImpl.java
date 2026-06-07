@@ -5,6 +5,8 @@ import kz.diploma.rprettser.simplelms.business.dto.request.StudentGroupRequestDt
 import kz.diploma.rprettser.simplelms.business.dto.response.StudentGroupResponseDto;
 import kz.diploma.rprettser.simplelms.business.facade.StudentGroupFacade;
 import kz.diploma.rprettser.simplelms.business.mapper.Mapper;
+import kz.diploma.rprettser.simplelms.business.service.AttendanceService;
+import kz.diploma.rprettser.simplelms.business.service.LessonService;
 import kz.diploma.rprettser.simplelms.business.service.StudentGroupService;
 import kz.diploma.rprettser.simplelms.dal.entity.StudentGroup;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ import java.util.NoSuchElementException;
 public class StudentGroupFacadeImpl implements StudentGroupFacade {
 
     private final StudentGroupService studentGroupService;
+    private final LessonService lessonService;
+    private final AttendanceService attendanceService;
     private final Mapper mapper;
 
     @Override
@@ -67,6 +71,9 @@ public class StudentGroupFacadeImpl implements StudentGroupFacade {
     @Transactional
     public StudentGroupResponseDto updateStudentGroup(Long id, StudentGroupRequestDto studentGroupRequestDto) {
         StudentGroup studentGroup = studentGroupService.updateStudentGroup(id, studentGroupRequestDto);
+
+        lessonService.getLessonsByStudentGroupId(studentGroup.getId())
+                .forEach(attendanceService::initAttendancesForLesson);
 
         return mapper.toStudentGroupResponseDto(studentGroup);
     }
