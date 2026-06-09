@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { createEntity, fetchById, fetchPage, updateEntity } from "../api.js";
 
@@ -15,24 +15,32 @@ export default function LessonAttendancePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    let active = true;
+  const savingRef = useRef(false);
 
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      setSuccess("");
+  useEffect(() => {
+    savingRef.current = saving;
+  }, [saving]);
+
+  const load = useCallback(
+    async ({ initial, activeRef }) => {
+      if (initial) {
+        setLoading(true);
+        setError("");
+        setSuccess("");
+      }
 
       try {
         const lessonData = await fetchById("/api/lesson", lessonId);
-        if (!active) return;
+        if (!activeRef.active) return;
 
         setLesson(lessonData);
 
         if (!lessonData.studentGroup?.id) {
           setStudents([]);
           setAttendanceByStudentId({});
-          setSelectionMap({});
+          if (initial) {
+            setSelectionMap({});
+          }
           return;
         }
 
@@ -46,7 +54,7 @@ export default function LessonAttendancePage() {
           })
         ]);
 
-        if (!active) return;
+        if (!activeRef.active) return;
 
         const groupStudents = Array.isArray(groupData.students) ? groupData.students : [];
         const records = Array.isArray(attendancePage.content) ? attendancePage.content : [];
@@ -64,24 +72,38 @@ export default function LessonAttendancePage() {
 
         setStudents(groupStudents);
         setAttendanceByStudentId(byStudent);
-        setSelectionMap(selected);
+        if (initial) {
+          setSelectionMap(selected);
+        }
       } catch (err) {
-        if (active) {
+        if (activeRef.active && initial) {
           setError(err.message || "Failed to load lesson attendance");
         }
       } finally {
-        if (active) {
+        if (activeRef.active && initial) {
           setLoading(false);
         }
       }
-    };
+    },
+    [lessonId]
+  );
 
-    load();
+  useEffect(() => {
+    const activeRef = { active: true };
+
+    load({ initial: true, activeRef });
+
+    const intervalId = setInterval(() => {
+      if (!savingRef.current) {
+        load({ initial: false, activeRef });
+      }
+    }, 3000);
 
     return () => {
-      active = false;
+      activeRef.active = false;
+      clearInterval(intervalId);
     };
-  }, [lessonId]);
+  }, [load]);
 
   const recap = useMemo(
     () =>
