@@ -56,7 +56,9 @@ export default function LessonAttendancePage() {
 
         if (!activeRef.active) return;
 
-        const groupStudents = Array.isArray(groupData.students) ? groupData.students : [];
+        const groupStudents = (Array.isArray(groupData.students) ? groupData.students : [])
+          .slice()
+          .sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
         const records = Array.isArray(attendancePage.content) ? attendancePage.content : [];
 
         const byStudent = {};
